@@ -21,6 +21,9 @@ public class EntityShader extends Shader {
 	private static final String POINT_LIGHT_COLOR_NAME = "u_point_light.color";
 	private static final String POINT_LIGHT_POSITION_NAME = "u_point_light.position";
 	private static final String POINT_LIGHT_INTENSITY_NAME = "u_point_light.intensity";
+	private static final String POINT_LIGHT_ATT_CONST_NAME = "u_point_light.att.constant";
+	private static final String POINT_LIGHT_ATT_LIN_NAME = "u_point_light.att.linear";
+	private static final String POINT_LIGHT_ATT_EXP_NAME = "u_point_light.att.exponent";
 	
 	public EntityShader() {
 		super(VERTEX_PATH, FRAGMENT_PATH);
@@ -41,6 +44,9 @@ public class EntityShader extends Shader {
 		getUniformLocation(POINT_LIGHT_COLOR_NAME);
 		getUniformLocation(POINT_LIGHT_POSITION_NAME);
 		getUniformLocation(POINT_LIGHT_INTENSITY_NAME);
+		getUniformLocation(POINT_LIGHT_ATT_CONST_NAME);
+		getUniformLocation(POINT_LIGHT_ATT_LIN_NAME);
+		getUniformLocation(POINT_LIGHT_ATT_EXP_NAME);
 	}
 
 	public void setProjectionMatrix(Matrix4f matrix) {
@@ -70,5 +76,9 @@ public class EntityShader extends Shader {
 		setUniform(POINT_LIGHT_COLOR_NAME, pointLight.getColor());
 		setUniform(POINT_LIGHT_POSITION_NAME, pointLight.getPosition());
 		setUniform(POINT_LIGHT_INTENSITY_NAME, pointLight.getIntensity());
+		PointLight.Attenuation attenuationModel = pointLight.getAttenuation();
+		setUniform(POINT_LIGHT_ATT_CONST_NAME, attenuationModel.getConstant());
+		setUniform(POINT_LIGHT_ATT_LIN_NAME, attenuationModel.getLinear());
+		setUniform(POINT_LIGHT_ATT_EXP_NAME, attenuationModel.getExponent());
 	}
 }

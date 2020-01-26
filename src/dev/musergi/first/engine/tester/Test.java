@@ -13,6 +13,7 @@ import dev.musergi.first.engine.render.mesh.Material;
 import dev.musergi.first.engine.render.mesh.Mesh;
 import dev.musergi.first.engine.render.mesh.WavefrontParser;
 import dev.musergi.first.engine.window.WindowManager;
+import dev.musergi.first.game.entity.Player;
 
 public class Test {
 	public static void main(String[] args) {
@@ -21,24 +22,21 @@ public class Test {
 		Loader loader = new Loader();
 		
 		Material defaultMaterial = new Material();
-		Material playerMaterial = new Material(ColorPalette.LIGHT_GREEN);
 		
 		Mesh floorMesh = WavefrontParser.load("assets/models/plane.obj", loader);
 		Entity floor = new Entity(floorMesh, defaultMaterial);
 		floor.getTransform().getPosition().add(-5f, 0, -5f);
-		
-		Mesh playerMesh = WavefrontParser.load("assets/models/player.obj", loader);
-		Entity player = new Entity(playerMesh, playerMaterial);
-		player.getTransform().getPosition().add(-5f, 0, -5f);
+
+		Player player = new Player(loader);
 		
 		EntityRenderer entityRenderer = new EntityRenderer();
 		
 		Camera camera = new Camera();
-		camera.getTransform().getPosition().set(5.0f, 2.0f, 5.0f);
-		camera.getTransform().getRotation().add(0f, 45.0f, 0);
+		camera.getTransform().getPosition().set(-5f, 5f, 0f);
+		camera.getTransform().getRotation().add(-45f, 0f, 0f);
 		
 		AmbientLight light = new AmbientLight(new Vector3f(0.5f));
-		PointLight pointLight = new PointLight(new Vector3f(1f), new Vector3f(-3.5f, 1f, -3.5f), 0.5f, 0.0f, 0.1f, 0.1f);
+		PointLight pointLight = new PointLight(new Vector3f(1f), new Vector3f(-3.5f, 1f, -3.5f), 0.5f, 1.0f, 0.0f, 0.0f);
 		
 		while (!WindowManager.shouldClose()) {
 			entityRenderer.prepare();
@@ -46,6 +44,8 @@ public class Test {
 			entityRenderer.setProjectionMatrix();
 			entityRenderer.render(camera, light, pointLight, player);
 			entityRenderer.render(camera, light, pointLight, floor);
+			
+			player.update();
 			
 			WindowManager.updateWindow();
 		}

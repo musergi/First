@@ -9,6 +9,7 @@ import dev.musergi.first.engine.render.entity.PointLight;
 import dev.musergi.first.engine.render.mesh.Mesh;
 import dev.musergi.first.engine.render.shaders.EntityShader;
 import dev.musergi.first.engine.render.utils.MathUtils;
+import dev.musergi.first.engine.window.WindowManager;
 
 public class EntityRenderer {
 	private static final float FOVY = 60.0f;
@@ -24,6 +25,7 @@ public class EntityRenderer {
 	
 	public void prepare() {
 		GL33.glClear(GL33.GL_COLOR_BUFFER_BIT | GL33.GL_DEPTH_BUFFER_BIT);
+		GL33.glViewport(0, 0, WindowManager.getWidth(), WindowManager.getHeight());
 	}
 	
 	public void render(Camera camera, AmbientLight ambientLight, PointLight pointLight, Entity entity) {

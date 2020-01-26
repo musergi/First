@@ -8,13 +8,16 @@ uniform mat4 u_view_matrix;
 uniform mat4 u_model_matrix;
 
 out vec3 p_world_position;
+out vec3 p_view_world_position;
 out vec3 p_world_normal;
 
 void main()
 {
 	vec4 world_position = u_model_matrix * vec4(v_position, 1.0);
+	vec4 view_world_position = u_view_matrix * world_position;
 
-	gl_Position = u_projection_matrix * u_view_matrix * world_position;
+	gl_Position = u_projection_matrix * view_world_position;
 	p_world_position = world_position.xyz;
+	p_view_world_position = view_world_position.xyz;
 	p_world_normal = normalize((u_model_matrix * vec4(v_normal, 0.0)).xyz);
 }
