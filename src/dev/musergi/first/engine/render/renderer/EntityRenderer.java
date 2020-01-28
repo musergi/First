@@ -1,4 +1,6 @@
-package dev.musergi.first.engine.render;
+package dev.musergi.first.engine.render.renderer;
+
+import java.util.List;
 
 import org.lwjgl.opengl.GL33;
 
@@ -42,6 +44,29 @@ public class EntityRenderer {
 		GL33.glEnableVertexAttribArray(0);
 		GL33.glEnableVertexAttribArray(1);
 		GL33.glDrawElements(GL33.GL_TRIANGLES, mesh.getVertexCount(), GL33.GL_UNSIGNED_INT, 0);
+		GL33.glDisableVertexAttribArray(0);
+		GL33.glDisableVertexAttribArray(1);
+		GL33.glBindVertexArray(0);
+		
+		entityShader.unbind();
+	}
+	
+	public void render(Camera camera, AmbientLight ambientLight, PointLight pointLight, Mesh mesh, List<Entity> entities) {
+		entityShader.bind();
+		entityShader.setViewMatrix(camera.getViewMatrix());
+		entityShader.setAmbientLight(ambientLight);
+		entityShader.setPointLight(pointLight);
+		
+		GL33.glBindVertexArray(mesh.getVao());
+		GL33.glEnableVertexAttribArray(0);
+		GL33.glEnableVertexAttribArray(1);
+		
+		for (Entity entity: entities) {
+			entityShader.setMaterial(entity.getMaterial());
+			entityShader.setModelMatrix(entity.getTransform().getMatrix());
+			GL33.glDrawElements(GL33.GL_TRIANGLES, mesh.getVertexCount(), GL33.GL_UNSIGNED_INT, 0);
+		}
+		
 		GL33.glDisableVertexAttribArray(0);
 		GL33.glDisableVertexAttribArray(1);
 		GL33.glBindVertexArray(0);
