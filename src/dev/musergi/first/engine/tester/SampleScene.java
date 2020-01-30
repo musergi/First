@@ -12,6 +12,7 @@ import dev.musergi.first.engine.render.mesh.Material;
 import dev.musergi.first.engine.render.mesh.Mesh;
 import dev.musergi.first.engine.render.mesh.WavefrontParser;
 import dev.musergi.first.game.entity.Player;
+import dev.musergi.first.game.entity.WorldTile;
 
 public class SampleScene extends Scene {
 
@@ -28,9 +29,12 @@ public class SampleScene extends Scene {
 		Entity floor = new Entity(floorMesh, defaultMaterial);
 		floor.getTransform().getPosition().add(-5f, 0, -5f);
 		Player player = new Player(loader);
+		Entity tile = new WorldTile(loader);
+		tile.getTransform().getPosition().add(-12f, -1, -12f);
 		
-		entities.add(floor);
+		//entities.add(floor);
 		entities.add(player);
+		entities.add(tile);
 	}
 	
 }

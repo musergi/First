@@ -35,7 +35,7 @@ public class MasterRenderer {
 	
 	public void prepare() {
 		GL33.glClear(GL33.GL_COLOR_BUFFER_BIT | GL33.GL_DEPTH_BUFFER_BIT);
-		GL33.glViewport(0, 0, WindowManager.getWidth(), WindowManager.getHeight());
+		//GL33.glViewport(0, 0, WindowManager.getWidth(), WindowManager.getHeight());
 	}
 	
 	public void render() {
