@@ -29,7 +29,7 @@ public class GLFWManager {
 		GLFW.glfwMakeContextCurrent(window);
 		GL.createCapabilities();
 		
-		return new Window(window);
+		return new Window(window, width, height);
 	}
 	
 	public static void cleanUp() {

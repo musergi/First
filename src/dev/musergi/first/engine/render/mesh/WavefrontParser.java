@@ -3,15 +3,37 @@ package dev.musergi.first.engine.render.mesh;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.joml.Vector3f;
 import org.joml.Vector3i;
 
+import dev.musergi.first.engine.render.gameobject.MeshComponent;
+
 public class WavefrontParser {
-	public static Mesh load(String filepath, Loader loader) {
+	private static Map<String, ParsedFile> parsedMeshes = new HashMap<String, ParsedFile>();
+	private static class ParsedFile {
+		public Mesh mesh;
+		public Material material;
+		
+		public ParsedFile(Mesh mesh, Material material) {
+			this.mesh = mesh;
+			this.material = material;
+		}
+	}
+			
+	public static MeshComponent load(String filepath) {
+		// Return cache
+		if (parsedMeshes.containsKey(filepath)) {
+			ParsedFile file = parsedMeshes.get(filepath);
+			return new MeshComponent(file.mesh, file.material);
+		}
+		
 		// Read lines
 		List<String> lines = new ArrayList<String>();
 		try {
@@ -29,9 +51,8 @@ public class WavefrontParser {
 		
 		// Read info from lines
 		List<Vector3f> positionsList = new ArrayList<Vector3f>();
-		List<Vector3f> normalList = new ArrayList<Vector3f>();
-		List<Integer> indicesList = new ArrayList<Integer>();
-		List<Vector3i> createdVertex = new ArrayList<Vector3i>();
+		Mesh mesh = new Mesh();
+		Material material = new Material();
 		for (String line: lines) {
 			if (line.startsWith("v ")) {
 				String[] bits = line.split(" ");
@@ -41,55 +62,69 @@ public class WavefrontParser {
 					Float.parseFloat(bits[3])
 				);
 				positionsList.add(position);
-			} else if (line.startsWith("vn ")) {
+			} else if (line.startsWith("f ")) {
+				String[] bits = line.substring(2).split(" ");
+				Vector3f v1 = positionsList.get(parseVertex(bits[0]).x - 1);
+				Vector3f v2 = positionsList.get(parseVertex(bits[1]).x - 1);
+				Vector3f v3 = positionsList.get(parseVertex(bits[2]).x - 1);
+				mesh.addFace(v1, v2, v3);
+			} else if (line.startsWith("mtllib")) {
+				Path path = Paths.get(filepath);
+				path = path.subpath(0, path.getNameCount() - 1);
+				String materialPath = Paths.get(path.toString(), line.split(" ")[1]).toString();
+				parseMaterial(materialPath, material);
+			}
+		}
+		
+		parsedMeshes.put(filepath, new WavefrontParser.ParsedFile(mesh, material));
+		return new MeshComponent(mesh, material);
+	}
+	
+	private static void parseMaterial(String filepath, Material out) {
+		List<String> lines = new ArrayList<String>();
+		try {
+			FileReader fileReader = new FileReader(filepath);
+			BufferedReader bufferedReader = new BufferedReader(fileReader);
+			String line;
+			while ((line = bufferedReader.readLine()) != null) {
+				lines.add(line);
+			}
+			bufferedReader.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		// Parse material
+		for (String line: lines) {
+			if (line.startsWith("Ka ")) {
 				String[] bits = line.split(" ");
-				Vector3f normal = new Vector3f(
+				Vector3f ambientColor = new Vector3f(
 					Float.parseFloat(bits[1]),
 					Float.parseFloat(bits[2]),
 					Float.parseFloat(bits[3])
 				);
-				normalList.add(normal);
-			} else if (line.startsWith("f ")) {
-				String[] bits = line.substring(2).split(" ");
-				for (String bit: bits) {
-					Vector3i vertex = parseVertex(bit);
-					int index = createdVertex.indexOf(vertex);
-					if (index >= 0) {
-						indicesList.add(index);
-					} else {
-						indicesList.add(createdVertex.size());
-						createdVertex.add(vertex);
-					}
-				}
+				out.setAmbientColor(ambientColor);
+			} else if (line.startsWith("Kd ")) {
+				String[] bits = line.split(" ");
+				Vector3f diffuseColor = new Vector3f(
+					Float.parseFloat(bits[1]),
+					Float.parseFloat(bits[2]),
+					Float.parseFloat(bits[3])
+				);
+				out.setDiffuseColor(diffuseColor);
+			} else if (line.startsWith("Ks ")) {
+				String[] bits = line.split(" ");
+				Vector3f specularColor = new Vector3f(
+					Float.parseFloat(bits[1]),
+					Float.parseFloat(bits[2]),
+					Float.parseFloat(bits[3])
+				);
+				out.setSpecularColor(specularColor);
+			} else if (line.startsWith("Ns ")) {
+				String[] bits = line.split(" ");
+				out.setSpecularExponent(Float.parseFloat(bits[1]));
 			}
 		}
-		
-		// Create necessary arrays
-		float[] positions = new float[createdVertex.size() * 3];
-		float[] normals = new float[createdVertex.size() * 3];
-		for (int i = 0; i < createdVertex.size(); i++) {
-			Vector3f position = positionsList.get(createdVertex.get(i).x - 1);
-			positions[i * 3] = position.x;
-			positions[i * 3 + 1] = position.y;
-			positions[i * 3 + 2] = position.z;
-			
-			Vector3f normal = normalList.get(createdVertex.get(i).z - 1);
-			normals[i * 3] = normal.x;
-			normals[i * 3 + 1] = normal.y;
-			normals[i * 3 + 2] = normal.z;
-		}
-		
-		int[] indices = new int[indicesList.size()];
-		for (int i = 0; i < indices.length; i++) {
-			indices[i] = indicesList.get(i);
-		}
-		
-		System.out.println(Arrays.toString(positions));
-		System.out.println(Arrays.toString(normals));
-		System.out.println(Arrays.toString(indices));
-		System.out.println();
-		
-		return loader.loadMesh(positions, normals, indices);
 	}
 	
 	private static Vector3i parseVertex(String vertexString) {

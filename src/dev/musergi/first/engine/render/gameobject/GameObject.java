@@ -10,7 +10,7 @@ public class GameObject {
 	public GameObject(String name) {
 		this.name = name;
 		components = new ArrayList<Component>();
-		components.add(new Transform());
+		addComponent(new Transform());
 	}
 	
 	public GameObject() {
@@ -21,6 +21,20 @@ public class GameObject {
 		for (Component component: components) {
 			component.update();
 		}
+	}
+	
+	public void addComponent(Component component) {
+		components.add(component);
+		component.setParent(this);
+	}
+	
+	public <T extends Component> T getComponent(Class<T> componentClass) {
+		for (Component component: components) {
+			if (component.getClass().isAssignableFrom(componentClass)) {
+				return (T) component;
+			}
+		}
+		return null;
 	}
 	
 	@Override
